@@ -1,0 +1,24 @@
+syntax = "proto3";
+option go_package = "core-web/proto";
+import "google/protobuf/empty.proto";
+
+message Song {
+  string name = 1;
+  uint32 seconds = 2;
+}
+
+message UpdateSongRequest {
+  SongLocation location = 1;
+  Song data = 2;
+}
+
+message SongLocation {
+  uint32 id = 1;
+}
+
+service Playlist {
+  rpc AddSong(Song) returns (SongLocation);
+  rpc UpdateSong(UpdateSongRequest) returns (google.protobuf.Empty);
+  rpc GetSong(SongLocation) returns (Song);
+  rpc DeleteSong(SongLocation) returns (Song);
+}
