@@ -19,194 +19,194 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// PlaylistClient is the client API for Playlist service.
+// CRUDClient is the client API for CRUD service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PlaylistClient interface {
+type CRUDClient interface {
 	AddSong(ctx context.Context, in *Song, opts ...grpc.CallOption) (*SongLocation, error)
-	UpdateSong(ctx context.Context, in *UpdateSongRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error)
+	UpdateSong(ctx context.Context, in *UpdateSongRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error)
 }
 
-type playlistClient struct {
+type cRUDClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewPlaylistClient(cc grpc.ClientConnInterface) PlaylistClient {
-	return &playlistClient{cc}
+func NewCRUDClient(cc grpc.ClientConnInterface) CRUDClient {
+	return &cRUDClient{cc}
 }
 
-func (c *playlistClient) AddSong(ctx context.Context, in *Song, opts ...grpc.CallOption) (*SongLocation, error) {
+func (c *cRUDClient) AddSong(ctx context.Context, in *Song, opts ...grpc.CallOption) (*SongLocation, error) {
 	out := new(SongLocation)
-	err := c.cc.Invoke(ctx, "/Playlist/AddSong", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/CRUD/AddSong", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *playlistClient) UpdateSong(ctx context.Context, in *UpdateSongRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *cRUDClient) GetSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error) {
+	out := new(Song)
+	err := c.cc.Invoke(ctx, "/CRUD/GetSong", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cRUDClient) UpdateSong(ctx context.Context, in *UpdateSongRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/Playlist/UpdateSong", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/CRUD/UpdateSong", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *playlistClient) GetSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error) {
+func (c *cRUDClient) DeleteSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error) {
 	out := new(Song)
-	err := c.cc.Invoke(ctx, "/Playlist/GetSong", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/CRUD/DeleteSong", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *playlistClient) DeleteSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error) {
-	out := new(Song)
-	err := c.cc.Invoke(ctx, "/Playlist/DeleteSong", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// PlaylistServer is the server API for Playlist service.
-// All implementations must embed UnimplementedPlaylistServer
+// CRUDServer is the server API for CRUD service.
+// All implementations must embed UnimplementedCRUDServer
 // for forward compatibility
-type PlaylistServer interface {
+type CRUDServer interface {
 	AddSong(context.Context, *Song) (*SongLocation, error)
-	UpdateSong(context.Context, *UpdateSongRequest) (*emptypb.Empty, error)
 	GetSong(context.Context, *SongLocation) (*Song, error)
+	UpdateSong(context.Context, *UpdateSongRequest) (*emptypb.Empty, error)
 	DeleteSong(context.Context, *SongLocation) (*Song, error)
-	mustEmbedUnimplementedPlaylistServer()
+	mustEmbedUnimplementedCRUDServer()
 }
 
-// UnimplementedPlaylistServer must be embedded to have forward compatible implementations.
-type UnimplementedPlaylistServer struct {
+// UnimplementedCRUDServer must be embedded to have forward compatible implementations.
+type UnimplementedCRUDServer struct {
 }
 
-func (UnimplementedPlaylistServer) AddSong(context.Context, *Song) (*SongLocation, error) {
+func (UnimplementedCRUDServer) AddSong(context.Context, *Song) (*SongLocation, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSong not implemented")
 }
-func (UnimplementedPlaylistServer) UpdateSong(context.Context, *UpdateSongRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateSong not implemented")
-}
-func (UnimplementedPlaylistServer) GetSong(context.Context, *SongLocation) (*Song, error) {
+func (UnimplementedCRUDServer) GetSong(context.Context, *SongLocation) (*Song, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSong not implemented")
 }
-func (UnimplementedPlaylistServer) DeleteSong(context.Context, *SongLocation) (*Song, error) {
+func (UnimplementedCRUDServer) UpdateSong(context.Context, *UpdateSongRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSong not implemented")
+}
+func (UnimplementedCRUDServer) DeleteSong(context.Context, *SongLocation) (*Song, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteSong not implemented")
 }
-func (UnimplementedPlaylistServer) mustEmbedUnimplementedPlaylistServer() {}
+func (UnimplementedCRUDServer) mustEmbedUnimplementedCRUDServer() {}
 
-// UnsafePlaylistServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PlaylistServer will
+// UnsafeCRUDServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CRUDServer will
 // result in compilation errors.
-type UnsafePlaylistServer interface {
-	mustEmbedUnimplementedPlaylistServer()
+type UnsafeCRUDServer interface {
+	mustEmbedUnimplementedCRUDServer()
 }
 
-func RegisterPlaylistServer(s grpc.ServiceRegistrar, srv PlaylistServer) {
-	s.RegisterService(&Playlist_ServiceDesc, srv)
+func RegisterCRUDServer(s grpc.ServiceRegistrar, srv CRUDServer) {
+	s.RegisterService(&CRUD_ServiceDesc, srv)
 }
 
-func _Playlist_AddSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CRUD_AddSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Song)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlaylistServer).AddSong(ctx, in)
+		return srv.(CRUDServer).AddSong(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Playlist/AddSong",
+		FullMethod: "/CRUD/AddSong",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServer).AddSong(ctx, req.(*Song))
+		return srv.(CRUDServer).AddSong(ctx, req.(*Song))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Playlist_UpdateSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CRUD_GetSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SongLocation)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CRUDServer).GetSong(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/CRUD/GetSong",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CRUDServer).GetSong(ctx, req.(*SongLocation))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CRUD_UpdateSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateSongRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlaylistServer).UpdateSong(ctx, in)
+		return srv.(CRUDServer).UpdateSong(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Playlist/UpdateSong",
+		FullMethod: "/CRUD/UpdateSong",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServer).UpdateSong(ctx, req.(*UpdateSongRequest))
+		return srv.(CRUDServer).UpdateSong(ctx, req.(*UpdateSongRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Playlist_GetSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CRUD_DeleteSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SongLocation)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlaylistServer).GetSong(ctx, in)
+		return srv.(CRUDServer).DeleteSong(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Playlist/GetSong",
+		FullMethod: "/CRUD/DeleteSong",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServer).GetSong(ctx, req.(*SongLocation))
+		return srv.(CRUDServer).DeleteSong(ctx, req.(*SongLocation))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Playlist_DeleteSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SongLocation)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PlaylistServer).DeleteSong(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/Playlist/DeleteSong",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServer).DeleteSong(ctx, req.(*SongLocation))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Playlist_ServiceDesc is the grpc.ServiceDesc for Playlist service.
+// CRUD_ServiceDesc is the grpc.ServiceDesc for CRUD service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Playlist_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Playlist",
-	HandlerType: (*PlaylistServer)(nil),
+var CRUD_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "CRUD",
+	HandlerType: (*CRUDServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "AddSong",
-			Handler:    _Playlist_AddSong_Handler,
-		},
-		{
-			MethodName: "UpdateSong",
-			Handler:    _Playlist_UpdateSong_Handler,
+			Handler:    _CRUD_AddSong_Handler,
 		},
 		{
 			MethodName: "GetSong",
-			Handler:    _Playlist_GetSong_Handler,
+			Handler:    _CRUD_GetSong_Handler,
+		},
+		{
+			MethodName: "UpdateSong",
+			Handler:    _CRUD_UpdateSong_Handler,
 		},
 		{
 			MethodName: "DeleteSong",
-			Handler:    _Playlist_DeleteSong_Handler,
+			Handler:    _CRUD_DeleteSong_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

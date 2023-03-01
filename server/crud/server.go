@@ -1,4 +1,4 @@
-package server
+package crud
 
 import (
 	"context"
@@ -9,19 +9,19 @@ import (
 	"time"
 )
 
-type PlaylistServerImpl struct {
-	proto.UnimplementedPlaylistServer
+type ServerImpl struct {
+	proto.UnimplementedCRUDServer
 	stored playlist.Playlist
 }
 
-func NewPlaylistServer() *PlaylistServerImpl {
+func NewServer() *ServerImpl {
 	list := playlist.NewPlaylist()
-	return &PlaylistServerImpl{
+	return &ServerImpl{
 		stored: list,
 	}
 }
 
-func (server PlaylistServerImpl) AddSong(_ context.Context, data *proto.Song) (*proto.SongLocation, error) {
+func (server ServerImpl) AddSong(_ context.Context, data *proto.Song) (*proto.SongLocation, error) {
 	added, err := server.stored.AddSong(*song.NewSong(data.GetName(), time.Duration(data.GetSeconds())*time.Second))
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (server PlaylistServerImpl) AddSong(_ context.Context, data *proto.Song) (*
 	return &proto.SongLocation{Id: added}, nil
 }
 
-func (server PlaylistServerImpl) UpdateSong(_ context.Context, req *proto.UpdateSongRequest) (*emptypb.Empty, error) {
+func (server ServerImpl) UpdateSong(_ context.Context, req *proto.UpdateSongRequest) (*emptypb.Empty, error) {
 	err := server.stored.ReplaceSong(req.GetLocation().GetId(), *song.NewSong(req.GetData().GetName(), time.Duration(req.GetData().GetSeconds())*time.Second))
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (server PlaylistServerImpl) UpdateSong(_ context.Context, req *proto.Update
 	return &emptypb.Empty{}, nil
 }
 
-func (server PlaylistServerImpl) GetSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
+func (server ServerImpl) GetSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
 	result, exists := server.stored.GetSong(req.GetId())
 	if !exists {
 		return nil, playlist.NewNoSuchSongError(req.GetId())
@@ -45,7 +45,7 @@ func (server PlaylistServerImpl) GetSong(_ context.Context, req *proto.SongLocat
 	return &proto.Song{Name: result.Name, Seconds: uint32(result.Length.Seconds())}, nil
 }
 
-func (server PlaylistServerImpl) DeleteSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
+func (server ServerImpl) DeleteSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
 	result, err := server.stored.RemoveSong(req.GetId())
 	if err != nil {
 		return nil, err

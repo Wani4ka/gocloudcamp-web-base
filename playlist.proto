@@ -16,9 +16,9 @@ message SongLocation {
   uint32 id = 1;
 }
 
-service Playlist {
+service CRUD {
   rpc AddSong(Song) returns (SongLocation);
-  rpc UpdateSong(UpdateSongRequest) returns (google.protobuf.Empty);
   rpc GetSong(SongLocation) returns (Song);
+  rpc UpdateSong(UpdateSongRequest) returns (google.protobuf.Empty);
   rpc DeleteSong(SongLocation) returns (Song);
 }
