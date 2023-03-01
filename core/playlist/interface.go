@@ -2,6 +2,7 @@ package playlist
 
 import (
 	"gocloudcamp/core/song"
+	"time"
 )
 
 type Playlist interface {
@@ -13,4 +14,6 @@ type Playlist interface {
 	GetSong(id uint32) (song.Song, bool)
 	ReplaceSong(id uint32, song song.Song) error
 	RemoveSong(id uint32) (song.Song, error)
+	IsPlaying() bool
+	GetNowPlaying() (song.Song, time.Duration, bool)
 }

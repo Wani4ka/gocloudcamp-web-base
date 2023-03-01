@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gocloudcamp/core/song"
 	"math/rand"
+	"time"
 )
 
 type Song struct {
@@ -36,6 +37,17 @@ func NewPlaylist() Playlist {
 		lastSong:    singleSong,
 		storage:     make(map[uint32]*Song),
 	}
+}
+
+func (playlist *playlist) IsPlaying() bool {
+	return !playlist.timer.IsPaused()
+}
+
+func (playlist *playlist) GetNowPlaying() (song.Song, time.Duration, bool) {
+	if playlist.currentSong == nil || !playlist.currentSong.data.IsValid() {
+		return song.Song{}, 0, false
+	}
+	return playlist.currentSong.data, playlist.timer.ElapsedTime(), playlist.IsPlaying()
 }
 
 func (playlist *playlist) Play() {

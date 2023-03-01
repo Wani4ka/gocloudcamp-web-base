@@ -6,6 +6,7 @@ import (
 
 type Timer interface {
 	Schedule(length time.Duration, callback func())
+	ElapsedTime() time.Duration
 	Stop()
 	Pause()
 	IsPaused() bool
@@ -62,7 +63,7 @@ func (timer *timerImpl) Resume() {
 	if !timer.IsPaused() {
 		return
 	}
-	elapsed := timer.pausedAt.Sub(timer.startedAt)
+	elapsed := timer.ElapsedTime()
 	timer.startedAt = time.Now().Add(-elapsed)
 	timer.pausedAt = time.Time{}
 	timer.object = time.NewTimer(timer.length - elapsed)
@@ -71,4 +72,15 @@ func (timer *timerImpl) Resume() {
 
 func (timer *timerImpl) IsPaused() bool {
 	return !timer.startedAt.IsZero() && !timer.pausedAt.IsZero()
+}
+
+func (timer *timerImpl) ElapsedTime() time.Duration {
+	if timer.startedAt.IsZero() {
+		return 0
+	}
+	if !timer.pausedAt.IsZero() {
+		return timer.pausedAt.Sub(timer.startedAt)
+	} else {
+		return time.Now().Sub(timer.startedAt)
+	}
 }
