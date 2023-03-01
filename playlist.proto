@@ -7,7 +7,7 @@ message Song {
   uint32 seconds = 2;
 }
 
-message UpdateSongRequest {
+message PlaylistEntry {
   SongLocation location = 1;
   Song data = 2;
 }
@@ -16,9 +16,21 @@ message SongLocation {
   uint32 id = 1;
 }
 
+message NowPlayingResponse {
+  PlaylistEntry entry = 1;
+  uint32 elapsed = 2;
+  bool playing = 3;
+}
+
 service CRUD {
   rpc AddSong(Song) returns (SongLocation);
   rpc GetSong(SongLocation) returns (Song);
-  rpc UpdateSong(UpdateSongRequest) returns (google.protobuf.Empty);
+  rpc UpdateSong(PlaylistEntry) returns (google.protobuf.Empty);
   rpc DeleteSong(SongLocation) returns (Song);
+}
+
+service Seek {
+  rpc Prev(google.protobuf.Empty) returns (PlaylistEntry);
+  rpc Next(google.protobuf.Empty) returns (PlaylistEntry);
+  rpc NowPlaying(google.protobuf.Empty) returns (NowPlayingResponse);
 }

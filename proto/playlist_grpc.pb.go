@@ -25,7 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type CRUDClient interface {
 	AddSong(ctx context.Context, in *Song, opts ...grpc.CallOption) (*SongLocation, error)
 	GetSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error)
-	UpdateSong(ctx context.Context, in *UpdateSongRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateSong(ctx context.Context, in *PlaylistEntry, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteSong(ctx context.Context, in *SongLocation, opts ...grpc.CallOption) (*Song, error)
 }
 
@@ -55,7 +55,7 @@ func (c *cRUDClient) GetSong(ctx context.Context, in *SongLocation, opts ...grpc
 	return out, nil
 }
 
-func (c *cRUDClient) UpdateSong(ctx context.Context, in *UpdateSongRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *cRUDClient) UpdateSong(ctx context.Context, in *PlaylistEntry, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/CRUD/UpdateSong", in, out, opts...)
 	if err != nil {
@@ -79,7 +79,7 @@ func (c *cRUDClient) DeleteSong(ctx context.Context, in *SongLocation, opts ...g
 type CRUDServer interface {
 	AddSong(context.Context, *Song) (*SongLocation, error)
 	GetSong(context.Context, *SongLocation) (*Song, error)
-	UpdateSong(context.Context, *UpdateSongRequest) (*emptypb.Empty, error)
+	UpdateSong(context.Context, *PlaylistEntry) (*emptypb.Empty, error)
 	DeleteSong(context.Context, *SongLocation) (*Song, error)
 	mustEmbedUnimplementedCRUDServer()
 }
@@ -94,7 +94,7 @@ func (UnimplementedCRUDServer) AddSong(context.Context, *Song) (*SongLocation, e
 func (UnimplementedCRUDServer) GetSong(context.Context, *SongLocation) (*Song, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSong not implemented")
 }
-func (UnimplementedCRUDServer) UpdateSong(context.Context, *UpdateSongRequest) (*emptypb.Empty, error) {
+func (UnimplementedCRUDServer) UpdateSong(context.Context, *PlaylistEntry) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateSong not implemented")
 }
 func (UnimplementedCRUDServer) DeleteSong(context.Context, *SongLocation) (*Song, error) {
@@ -150,7 +150,7 @@ func _CRUD_GetSong_Handler(srv interface{}, ctx context.Context, dec func(interf
 }
 
 func _CRUD_UpdateSong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateSongRequest)
+	in := new(PlaylistEntry)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func _CRUD_UpdateSong_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/CRUD/UpdateSong",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CRUDServer).UpdateSong(ctx, req.(*UpdateSongRequest))
+		return srv.(CRUDServer).UpdateSong(ctx, req.(*PlaylistEntry))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -207,6 +207,164 @@ var CRUD_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteSong",
 			Handler:    _CRUD_DeleteSong_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "playlist.proto",
+}
+
+// SeekClient is the client API for Seek service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SeekClient interface {
+	Prev(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PlaylistEntry, error)
+	Next(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PlaylistEntry, error)
+	NowPlaying(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NowPlayingResponse, error)
+}
+
+type seekClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSeekClient(cc grpc.ClientConnInterface) SeekClient {
+	return &seekClient{cc}
+}
+
+func (c *seekClient) Prev(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PlaylistEntry, error) {
+	out := new(PlaylistEntry)
+	err := c.cc.Invoke(ctx, "/Seek/Prev", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seekClient) Next(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PlaylistEntry, error) {
+	out := new(PlaylistEntry)
+	err := c.cc.Invoke(ctx, "/Seek/Next", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seekClient) NowPlaying(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NowPlayingResponse, error) {
+	out := new(NowPlayingResponse)
+	err := c.cc.Invoke(ctx, "/Seek/NowPlaying", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SeekServer is the server API for Seek service.
+// All implementations must embed UnimplementedSeekServer
+// for forward compatibility
+type SeekServer interface {
+	Prev(context.Context, *emptypb.Empty) (*PlaylistEntry, error)
+	Next(context.Context, *emptypb.Empty) (*PlaylistEntry, error)
+	NowPlaying(context.Context, *emptypb.Empty) (*NowPlayingResponse, error)
+	mustEmbedUnimplementedSeekServer()
+}
+
+// UnimplementedSeekServer must be embedded to have forward compatible implementations.
+type UnimplementedSeekServer struct {
+}
+
+func (UnimplementedSeekServer) Prev(context.Context, *emptypb.Empty) (*PlaylistEntry, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Prev not implemented")
+}
+func (UnimplementedSeekServer) Next(context.Context, *emptypb.Empty) (*PlaylistEntry, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Next not implemented")
+}
+func (UnimplementedSeekServer) NowPlaying(context.Context, *emptypb.Empty) (*NowPlayingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NowPlaying not implemented")
+}
+func (UnimplementedSeekServer) mustEmbedUnimplementedSeekServer() {}
+
+// UnsafeSeekServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SeekServer will
+// result in compilation errors.
+type UnsafeSeekServer interface {
+	mustEmbedUnimplementedSeekServer()
+}
+
+func RegisterSeekServer(s grpc.ServiceRegistrar, srv SeekServer) {
+	s.RegisterService(&Seek_ServiceDesc, srv)
+}
+
+func _Seek_Prev_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeekServer).Prev(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Seek/Prev",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeekServer).Prev(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Seek_Next_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeekServer).Next(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Seek/Next",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeekServer).Next(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Seek_NowPlaying_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeekServer).NowPlaying(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Seek/NowPlaying",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeekServer).NowPlaying(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Seek_ServiceDesc is the grpc.ServiceDesc for Seek service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Seek_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "Seek",
+	HandlerType: (*SeekServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Prev",
+			Handler:    _Seek_Prev_Handler,
+		},
+		{
+			MethodName: "Next",
+			Handler:    _Seek_Next_Handler,
+		},
+		{
+			MethodName: "NowPlaying",
+			Handler:    _Seek_NowPlaying_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

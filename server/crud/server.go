@@ -14,14 +14,13 @@ type ServerImpl struct {
 	stored playlist.Playlist
 }
 
-func NewServer() *ServerImpl {
-	list := playlist.NewPlaylist()
+func NewServer(stored playlist.Playlist) *ServerImpl {
 	return &ServerImpl{
-		stored: list,
+		stored: stored,
 	}
 }
 
-func (server ServerImpl) AddSong(_ context.Context, data *proto.Song) (*proto.SongLocation, error) {
+func (server *ServerImpl) AddSong(_ context.Context, data *proto.Song) (*proto.SongLocation, error) {
 	added, err := server.stored.AddSong(*song.NewSong(data.GetName(), time.Duration(data.GetSeconds())*time.Second))
 	if err != nil {
 		return nil, err
@@ -29,7 +28,7 @@ func (server ServerImpl) AddSong(_ context.Context, data *proto.Song) (*proto.So
 	return &proto.SongLocation{Id: added}, nil
 }
 
-func (server ServerImpl) UpdateSong(_ context.Context, req *proto.UpdateSongRequest) (*emptypb.Empty, error) {
+func (server *ServerImpl) UpdateSong(_ context.Context, req *proto.PlaylistEntry) (*emptypb.Empty, error) {
 	err := server.stored.ReplaceSong(req.GetLocation().GetId(), *song.NewSong(req.GetData().GetName(), time.Duration(req.GetData().GetSeconds())*time.Second))
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func (server ServerImpl) UpdateSong(_ context.Context, req *proto.UpdateSongRequ
 	return &emptypb.Empty{}, nil
 }
 
-func (server ServerImpl) GetSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
+func (server *ServerImpl) GetSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
 	result, exists := server.stored.GetSong(req.GetId())
 	if !exists {
 		return nil, playlist.NewNoSuchSongError(req.GetId())
@@ -45,7 +44,7 @@ func (server ServerImpl) GetSong(_ context.Context, req *proto.SongLocation) (*p
 	return &proto.Song{Name: result.Name, Seconds: uint32(result.Length.Seconds())}, nil
 }
 
-func (server ServerImpl) DeleteSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
+func (server *ServerImpl) DeleteSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
 	result, err := server.stored.RemoveSong(req.GetId())
 	if err != nil {
 		return nil, err

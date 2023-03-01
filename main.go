@@ -1,8 +1,10 @@
 package main
 
 import (
+	"gocloudcamp/core/playlist"
 	"gocloudcamp/proto"
 	"gocloudcamp/server/crud"
+	"gocloudcamp/server/seek"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -20,7 +22,9 @@ func main() {
 		log.Fatalf("cannot create listener: %v", err)
 	}
 	serverRegistar := grpc.NewServer()
-	proto.RegisterCRUDServer(serverRegistar, crud.NewServer())
+	stored := playlist.NewPlaylist()
+	proto.RegisterCRUDServer(serverRegistar, crud.NewServer(stored))
+	proto.RegisterSeekServer(serverRegistar, seek.NewServer(stored))
 	err = serverRegistar.Serve(lis)
 	if err != nil {
 		log.Fatalf("impossible to serve: %v", err)
