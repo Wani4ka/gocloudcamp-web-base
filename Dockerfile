@@ -1,5 +1,5 @@
 ## Build
-FROM golang:1.19.6-buster AS build
+FROM golang:1.19.6-alpine AS build
 
 WORKDIR /app
 
@@ -9,15 +9,13 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o /gocloudcamp
+RUN CGO_ENABLED=0 go build -o /gocloudcamp
 
 ## Deploy
-FROM gcr.io/distroless/base-debian10
+FROM scratch
 
 WORKDIR /
 
 COPY --from=build /gocloudcamp /gocloudcamp
-
-USER nonroot:nonroot
 
 ENTRYPOINT ["/gocloudcamp"]
