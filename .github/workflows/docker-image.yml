@@ -2,9 +2,6 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
 
@@ -16,18 +13,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Login to GitHub Container Registry
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag gocloudcamp
-    - name: set lower case owner name
-      run: |
-        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-      env:
-        OWNER: '${{ github.repository_owner }}'
+    - name: Login to GitHub Container Registry
+      if: ${{ github.ref == 'refs/heads/master' }}
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Tag & publish to GitHub Container Registry
+      if: ${{ github.ref == 'refs/heads/master' }}
       run: |
-        IMAGE_ID=ghcr.io/$OWNER_LC/gocloudcamp
+        IMAGE_ID=ghcr.io/${OWNER,,}/gocloudcamp
         VERSION=latest
         docker tag gocloudcamp $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
+      env:
+        OWNER: '${{ github.repository_owner }}'
