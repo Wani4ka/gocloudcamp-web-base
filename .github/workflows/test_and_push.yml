@@ -17,7 +17,7 @@ jobs:
         run: go test -v ./...
 
   build:
-    depends: test
+    needs: test
     name: Build the Docker image
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +26,7 @@ jobs:
         run: docker build . --file Dockerfile --tag gocloudcamp
 
   push:
-    depends: build
+    needs: build
     runs-on: ubuntu-latest
     if: success() && github.ref == 'refs/heads/master'
     permissions:
