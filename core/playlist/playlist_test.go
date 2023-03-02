@@ -17,7 +17,7 @@ func createPlaylist(t *testing.T) *playlist {
 	return got
 }
 
-func createPlaylistWithSongs(t *testing.T, songsAmount int) (pl *playlist, songs []*songmodule.Song, ids []uint32) {
+func createPlaylistWithSongs(t *testing.T, songsAmount int) (pl *playlist, songs []*songmodule.Song, ids []SongId) {
 	rand.Seed(time.Now().Unix())
 	pl = createPlaylist(t)
 	for i := 0; i < songsAmount; i++ {
@@ -139,7 +139,10 @@ func TestPlaylist_Seek(t *testing.T) {
 		t.Fatal("Playlist didn't initialize the first song")
 	}
 	for i := 1; i < amount; i++ {
-		pl.Next()
+		_, err := pl.Next()
+		if err != nil {
+			t.Fatalf("Error occurred during Next() method call: %v", err)
+		}
 		if !validateCurrentSong(pl, songs[i]) {
 			t.Fatalf("Playlist should play %v-th song after %v next() method calls", i+1, i)
 		}
@@ -148,7 +151,10 @@ func TestPlaylist_Seek(t *testing.T) {
 		t.Fatal("Current song in playlist is not last, but should be")
 	}
 	for i := amount - 2; i > -1; i-- {
-		pl.Prev()
+		_, err := pl.Prev()
+		if err != nil {
+			t.Fatalf("Error occurred during Prev() method call: %v", err)
+		}
 		if !validateCurrentSong(pl, songs[i]) {
 			t.Fatalf("Playlist should play %v-th song after %v Prev() method calls", i+1, amount-i+1)
 		}
@@ -217,7 +223,10 @@ func TestPlaylist_DeleteEdges(t *testing.T) {
 	if !validateCurrentSong(pl, songs[0]) {
 		t.Fatal("Playlist didn't initialize the first song")
 	}
-	pl.Next()
+	_, err := pl.Next()
+	if err != nil {
+		t.Fatalf("Error occurred during Next() method call: %v", err)
+	}
 	removed, err := pl.RemoveSong(ids[0])
 	if err != nil {
 		t.Fatalf("Playlist couldn't remove the first song, but it's allowed to remove: %v", err)
