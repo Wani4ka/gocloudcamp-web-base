@@ -2,11 +2,32 @@ name: Docker Image CI
 
 on:
   push:
+    branches: [ "master" ]
 
 jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.6'
+      - name: Test
+        run: go test -v ./...
 
   build:
+    depends: test
+    name: Build the Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag gocloudcamp
 
+  push:
+    depends: build
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -16,10 +37,8 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag gocloudcamp
     - name: Login to GitHub Container Registry
-      if: ${{ github.ref == 'refs/heads/master' }}
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Tag & publish to GitHub Container Registry
-      if: ${{ github.ref == 'refs/heads/master' }}
       run: |
         IMAGE_ID=ghcr.io/${OWNER,,}/gocloudcamp
         VERSION=latest
