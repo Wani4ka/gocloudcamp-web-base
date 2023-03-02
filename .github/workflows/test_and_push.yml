@@ -2,7 +2,6 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "master" ]
 
 jobs:
   test:
@@ -29,6 +28,7 @@ jobs:
   push:
     depends: build
     runs-on: ubuntu-latest
+    if: success() && github.ref == 'refs/heads/master'
     permissions:
       packages: write
 
