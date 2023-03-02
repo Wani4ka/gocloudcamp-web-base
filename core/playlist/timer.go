@@ -10,6 +10,7 @@ type Timer interface {
 	Stop()
 	Pause()
 	IsPaused() bool
+	IsScheduled() bool
 	Resume()
 }
 
@@ -72,6 +73,10 @@ func (timer *timerImpl) Resume() {
 
 func (timer *timerImpl) IsPaused() bool {
 	return !timer.startedAt.IsZero() && !timer.pausedAt.IsZero()
+}
+
+func (timer *timerImpl) IsScheduled() bool {
+	return timer.callback != nil
 }
 
 func (timer *timerImpl) ElapsedTime() time.Duration {

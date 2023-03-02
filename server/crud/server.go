@@ -25,11 +25,11 @@ func (server *ServerImpl) AddSong(_ context.Context, data *proto.Song) (*proto.S
 	if err != nil {
 		return nil, err
 	}
-	return &proto.SongLocation{Id: added}, nil
+	return &proto.SongLocation{Id: uint32(added)}, nil
 }
 
 func (server *ServerImpl) UpdateSong(_ context.Context, req *proto.PlaylistEntry) (*emptypb.Empty, error) {
-	err := server.stored.ReplaceSong(req.GetLocation().GetId(), *song.NewSong(req.GetData().GetName(), time.Duration(req.GetData().GetSeconds())*time.Second))
+	err := server.stored.ReplaceSong(playlist.SongId(req.GetLocation().GetId()), *song.NewSong(req.GetData().GetName(), time.Duration(req.GetData().GetSeconds())*time.Second))
 	if err != nil {
 		return nil, err
 	}
@@ -37,15 +37,15 @@ func (server *ServerImpl) UpdateSong(_ context.Context, req *proto.PlaylistEntry
 }
 
 func (server *ServerImpl) GetSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
-	result, exists := server.stored.GetSong(req.GetId())
+	result, exists := server.stored.GetSong(playlist.SongId(req.GetId()))
 	if !exists {
-		return nil, playlist.NewNoSuchSongError(req.GetId())
+		return nil, playlist.NewNoSuchSongError(playlist.SongId(req.GetId()))
 	}
 	return &proto.Song{Name: result.Name, Seconds: uint32(result.Length.Seconds())}, nil
 }
 
 func (server *ServerImpl) DeleteSong(_ context.Context, req *proto.SongLocation) (*proto.Song, error) {
-	result, err := server.stored.RemoveSong(req.GetId())
+	result, err := server.stored.RemoveSong(playlist.SongId(req.GetId()))
 	if err != nil {
 		return nil, err
 	}

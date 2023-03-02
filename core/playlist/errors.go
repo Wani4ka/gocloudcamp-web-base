@@ -3,10 +3,10 @@ package playlist
 import "fmt"
 
 type NoSuchSongError struct {
-	SongId uint32
+	SongId SongId
 }
 
-func NewNoSuchSongError(songId uint32) NoSuchSongError {
+func NewNoSuchSongError(songId SongId) NoSuchSongError {
 	return NoSuchSongError{SongId: songId}
 }
 func (err NoSuchSongError) Error() string {
@@ -14,10 +14,10 @@ func (err NoSuchSongError) Error() string {
 }
 
 type SongIsCurrentlyPlayingError struct {
-	SongId uint32
+	SongId SongId
 }
 
-func NewSongIsCurrentlyPlayingError(songId uint32) SongIsCurrentlyPlayingError {
+func NewSongIsCurrentlyPlayingError(songId SongId) SongIsCurrentlyPlayingError {
 	return SongIsCurrentlyPlayingError{SongId: songId}
 }
 func (err SongIsCurrentlyPlayingError) Error() string {

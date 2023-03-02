@@ -33,4 +33,6 @@ service Seek {
   rpc Prev(google.protobuf.Empty) returns (PlaylistEntry);
   rpc Next(google.protobuf.Empty) returns (PlaylistEntry);
   rpc NowPlaying(google.protobuf.Empty) returns (NowPlayingResponse);
+  rpc Play(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc Pause(google.protobuf.Empty) returns (google.protobuf.Empty);
 }

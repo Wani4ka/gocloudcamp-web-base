@@ -220,6 +220,8 @@ type SeekClient interface {
 	Prev(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PlaylistEntry, error)
 	Next(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PlaylistEntry, error)
 	NowPlaying(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NowPlayingResponse, error)
+	Play(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Pause(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type seekClient struct {
@@ -257,6 +259,24 @@ func (c *seekClient) NowPlaying(ctx context.Context, in *emptypb.Empty, opts ...
 	return out, nil
 }
 
+func (c *seekClient) Play(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/Seek/Play", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seekClient) Pause(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/Seek/Pause", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SeekServer is the server API for Seek service.
 // All implementations must embed UnimplementedSeekServer
 // for forward compatibility
@@ -264,6 +284,8 @@ type SeekServer interface {
 	Prev(context.Context, *emptypb.Empty) (*PlaylistEntry, error)
 	Next(context.Context, *emptypb.Empty) (*PlaylistEntry, error)
 	NowPlaying(context.Context, *emptypb.Empty) (*NowPlayingResponse, error)
+	Play(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	Pause(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSeekServer()
 }
 
@@ -279,6 +301,12 @@ func (UnimplementedSeekServer) Next(context.Context, *emptypb.Empty) (*PlaylistE
 }
 func (UnimplementedSeekServer) NowPlaying(context.Context, *emptypb.Empty) (*NowPlayingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NowPlaying not implemented")
+}
+func (UnimplementedSeekServer) Play(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Play not implemented")
+}
+func (UnimplementedSeekServer) Pause(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Pause not implemented")
 }
 func (UnimplementedSeekServer) mustEmbedUnimplementedSeekServer() {}
 
@@ -347,6 +375,42 @@ func _Seek_NowPlaying_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Seek_Play_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeekServer).Play(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Seek/Play",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeekServer).Play(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Seek_Pause_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeekServer).Pause(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Seek/Pause",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeekServer).Pause(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Seek_ServiceDesc is the grpc.ServiceDesc for Seek service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -365,6 +429,14 @@ var Seek_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NowPlaying",
 			Handler:    _Seek_NowPlaying_Handler,
+		},
+		{
+			MethodName: "Play",
+			Handler:    _Seek_Play_Handler,
+		},
+		{
+			MethodName: "Pause",
+			Handler:    _Seek_Pause_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

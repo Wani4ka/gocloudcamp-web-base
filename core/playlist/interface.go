@@ -5,15 +5,17 @@ import (
 	"time"
 )
 
+type SongId uint32
+
 type Playlist interface {
 	Play()
 	Pause()
-	AddSong(song song.Song) (uint32, error)
-	Next()
-	Prev()
-	GetSong(id uint32) (song.Song, bool)
-	ReplaceSong(id uint32, song song.Song) error
-	RemoveSong(id uint32) (song.Song, error)
+	AddSong(song song.Song) (SongId, error)
+	Next() (SongId, error)
+	Prev() (SongId, error)
+	GetSong(id SongId) (song.Song, bool)
+	ReplaceSong(id SongId, song song.Song) error
+	RemoveSong(id SongId) (song.Song, error)
 	IsPlaying() bool
-	GetNowPlaying() (song.Song, time.Duration, bool)
+	GetNowPlaying() (SongId, song.Song, time.Duration, bool)
 }
