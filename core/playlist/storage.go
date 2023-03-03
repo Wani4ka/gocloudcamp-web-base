@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	songmodule "gocloudcamp/core/song"
 	"os"
+	"sync"
 )
 
 type Storage interface {
@@ -12,22 +13,16 @@ type Storage interface {
 	Load() (Playlist, error)
 }
 
-type msg struct {
-	pl  Playlist
-	err error
-}
-
 type storage struct {
 	dir  string
 	path string
-	lock chan msg
+	lock sync.Mutex
 }
 
 func NewStorage(dir string, file string) Storage {
 	return &storage{
 		dir:  dir,
 		path: dir + "/" + file,
-		lock: make(chan msg, 1),
 	}
 }
 
@@ -82,11 +77,10 @@ func (st *storage) save(pl Playlist) error {
 }
 
 func (st *storage) Save(pl Playlist) error {
-	go func() {
-		err := st.save(pl)
-		st.lock <- msg{err: err}
-	}()
-	return (<-st.lock).err
+	st.lock.Lock()
+	err := st.save(pl)
+	st.lock.Unlock()
+	return err
 }
 
 func (st *storage) fromBytes(buf *bytes.Buffer) (Playlist, error) {
@@ -126,12 +120,8 @@ func (st *storage) load() (Playlist, error) {
 }
 
 func (st *storage) Load() (Playlist, error) {
-	go func() {
-		pl, err := st.load()
-		x := 1
-		x--
-		st.lock <- msg{pl, err}
-	}()
-	result := <-st.lock
-	return result.pl, result.err
+	st.lock.Lock()
+	pl, err := st.load()
+	st.lock.Unlock()
+	return pl, err
 }
