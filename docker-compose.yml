@@ -1,0 +1,12 @@
+services:
+  server:
+    container_name: server
+    image: 'ghcr.io/wani4ka/gocloudcamp:latest'
+    restart: always
+    ports: [ '${HTTP_PORT}:${HTTP_PORT}' ]
+    env_file: '.env'
+    volumes:
+      - 'storage:/${STORAGE_PATH}'
+
+volumes:
+  storage:

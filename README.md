@@ -21,3 +21,8 @@
 * напишите Dockerfile и docker-compose.yml
 * покроете проект unit-тестами
 * сделаете тестовый пример использования написанного сервиса
+
+### docker-compose
+Пример docker-compose.yml с использованием изображения: [docker-compose.yml](https://github.com/Wani4ka/gocloudcamp-web-base/blob/master/docker-compose.yml)
+
+Допускается возможность изменить порт gRPC (параметр `HTTP_PORT` в [.env](https://github.com/Wani4ka/gocloudcamp-web-base/blob/master/.env.example)) и путь к каталогу внутри изображения, в котором будет храниться файл (параметр `STORAGE_PATH` в [.env](https://github.com/Wani4ka/gocloudcamp-web-base/blob/master/.env.example))
