@@ -20,13 +20,15 @@ jobs:
     needs: test
     name: Build the Docker image
     runs-on: ubuntu-latest
+    if: success() && github.ref != 'refs/heads/master'
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag gocloudcamp
 
   push:
-    needs: build
+    needs: test
+    name: Build the Docker image and push to GHCR
     runs-on: ubuntu-latest
     if: success() && github.ref == 'refs/heads/master'
     permissions:
