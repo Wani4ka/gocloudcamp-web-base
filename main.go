@@ -16,13 +16,24 @@ func main() {
 	if port == "" {
 		port = "8089"
 	}
-	log.Printf("Listening on port %v", port)
+	storagePath := os.Getenv("STORAGE_PATH")
+	if storagePath == "" {
+		storagePath = "storage.local"
+	}
+
+	storage := playlist.NewStorage(storagePath, "playlist.dat")
+	stored, err := storage.Load()
+	if err != nil {
+		log.Printf("cannot load a playlist: %v", err)
+		log.Println("creating a new one instead")
+	}
+
+	log.Printf("listening on port %v", port)
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("cannot create listener: %v", err)
 	}
 	serverRegistar := grpc.NewServer()
-	stored := playlist.NewPlaylist()
 	proto.RegisterCRUDServer(serverRegistar, crud.NewServer(stored))
 	proto.RegisterSeekServer(serverRegistar, seek.NewServer(stored))
 	err = serverRegistar.Serve(lis)

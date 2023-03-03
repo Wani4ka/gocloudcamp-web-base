@@ -3,6 +3,7 @@ package playlist
 import (
 	"errors"
 	"gocloudcamp/core/song"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -26,7 +27,8 @@ type playlist struct {
 	currentSong *Song
 	lastSong    *Song
 	timer       Timer
-	storage     map[SongId]*Song
+	indexes     map[SongId]*Song
+	storage     Storage
 }
 
 func NewPlaylist() Playlist {
@@ -35,7 +37,17 @@ func NewPlaylist() Playlist {
 		timer:       NewTimer(),
 		currentSong: singleSong,
 		lastSong:    singleSong,
-		storage:     make(map[SongId]*Song),
+		indexes:     make(map[SongId]*Song),
+	}
+}
+
+func (playlist *playlist) save() {
+	if playlist.storage == nil {
+		return
+	}
+	err := playlist.storage.Save(playlist)
+	if err != nil {
+		log.Printf("Couldn't save playlist due to an error: %v", err)
 	}
 }
 
@@ -70,13 +82,14 @@ func (playlist *playlist) AddSong(song song.Song) (SongId, error) {
 	}
 	playlist.lastSong.define(song)
 	id := playlist.lastSong.id
-	playlist.storage[id] = playlist.lastSong
+	playlist.indexes[id] = playlist.lastSong
 	playlist.lastSong = playlist.lastSong.next
+	playlist.save()
 	return id, nil
 }
 
 func (playlist *playlist) GetSong(id SongId) (song.Song, bool) {
-	sng, exists := playlist.storage[id]
+	sng, exists := playlist.indexes[id]
 	if !exists || sng == nil || !sng.data.IsValid() {
 		return song.Song{}, false
 	}
@@ -87,7 +100,7 @@ func (playlist *playlist) ReplaceSong(id SongId, song song.Song) error {
 	if !song.IsValid() {
 		return errors.New("invalid song")
 	}
-	sng := playlist.storage[id]
+	sng := playlist.indexes[id]
 	if sng == nil {
 		return NewNoSuchSongError(id)
 	}
@@ -95,11 +108,12 @@ func (playlist *playlist) ReplaceSong(id SongId, song song.Song) error {
 		return NewSongIsCurrentlyPlayingError(id)
 	}
 	sng.data = song
+	playlist.save()
 	return nil
 }
 
 func (playlist *playlist) RemoveSong(id SongId) (song.Song, error) {
-	sng, exists := playlist.storage[id]
+	sng, exists := playlist.indexes[id]
 	if !exists {
 		return song.Song{}, NewNoSuchSongError(id)
 	}
@@ -110,7 +124,8 @@ func (playlist *playlist) RemoveSong(id SongId) (song.Song, error) {
 		sng.previous.next = sng.next
 		sng.next.previous = sng.previous
 	}
-	playlist.storage[id] = nil
+	playlist.indexes[id] = nil
+	playlist.save()
 	return sng.data, nil
 }
 
@@ -119,6 +134,7 @@ func (playlist *playlist) Next() (SongId, error) {
 	if playlist.currentSong.next != nil {
 		playlist.currentSong = playlist.currentSong.next
 	}
+	playlist.save()
 	if playlist.currentSong.data.IsValid() {
 		playlist.Play()
 		return playlist.currentSong.id, nil
@@ -135,6 +151,7 @@ func (playlist *playlist) Prev() (SongId, error) {
 	if playlist.currentSong.previous != nil {
 		playlist.currentSong = playlist.currentSong.previous
 	}
+	playlist.save()
 	if playlist.currentSong.data.IsValid() {
 		playlist.Play()
 		return playlist.currentSong.id, nil
