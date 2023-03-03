@@ -1,7 +1,6 @@
 package playlist
 
 import (
-	"errors"
 	"gocloudcamp/core/song"
 	"log"
 	"math/rand"
@@ -78,7 +77,7 @@ func (playlist *playlist) Pause() {
 
 func (playlist *playlist) AddSong(song song.Song) (SongId, error) {
 	if !song.IsValid() {
-		return 0, errors.New("invalid song")
+		return 0, NewInvalidSongError()
 	}
 	playlist.lastSong.define(song)
 	id := playlist.lastSong.id
@@ -98,7 +97,7 @@ func (playlist *playlist) GetSong(id SongId) (song.Song, bool) {
 
 func (playlist *playlist) ReplaceSong(id SongId, song song.Song) error {
 	if !song.IsValid() {
-		return errors.New("invalid song")
+		return NewInvalidSongError()
 	}
 	sng := playlist.indexes[id]
 	if sng == nil {
@@ -139,7 +138,7 @@ func (playlist *playlist) Next() (SongId, error) {
 		playlist.Play()
 		return playlist.currentSong.id, nil
 	}
-	return 0, errors.New("playlist is empty")
+	return 0, NewEmptyPlaylistError()
 }
 
 func (playlist *playlist) next() {
@@ -156,5 +155,5 @@ func (playlist *playlist) Prev() (SongId, error) {
 		playlist.Play()
 		return playlist.currentSong.id, nil
 	}
-	return 0, errors.New("playlist is empty")
+	return 0, NewEmptyPlaylistError()
 }

@@ -5,8 +5,6 @@ import (
 	"gocloudcamp/core/playlist"
 	"gocloudcamp/proto"
 	"gocloudcamp/server/util"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -24,7 +22,7 @@ func NewServer(stored playlist.Playlist) *ServerImpl {
 func (server *ServerImpl) Prev(context.Context, *emptypb.Empty) (*proto.PlaylistEntry, error) {
 	id, err := server.stored.Prev()
 	if err != nil {
-		return nil, err
+		return nil, util.WrapErrorToGRPC(err)
 	}
 	song, _ := server.stored.GetSong(id)
 	return &proto.PlaylistEntry{
@@ -36,7 +34,7 @@ func (server *ServerImpl) Prev(context.Context, *emptypb.Empty) (*proto.Playlist
 func (server *ServerImpl) Next(context.Context, *emptypb.Empty) (*proto.PlaylistEntry, error) {
 	id, err := server.stored.Next()
 	if err != nil {
-		return nil, err
+		return nil, util.WrapErrorToGRPC(err)
 	}
 	song, _ := server.stored.GetSong(id)
 	return &proto.PlaylistEntry{
@@ -47,7 +45,7 @@ func (server *ServerImpl) Next(context.Context, *emptypb.Empty) (*proto.Playlist
 func (server *ServerImpl) NowPlaying(context.Context, *emptypb.Empty) (*proto.NowPlayingResponse, error) {
 	id, song, elapsed, playing := server.stored.GetNowPlaying()
 	if !song.IsValid() {
-		return nil, status.Errorf(codes.OutOfRange, "playlist is empty")
+		return nil, util.WrapErrorToGRPC(playlist.NewEmptyPlaylistError())
 	}
 	return &proto.NowPlayingResponse{
 		Entry: &proto.PlaylistEntry{
