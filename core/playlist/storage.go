@@ -91,7 +91,7 @@ func (st *storage) Save(pl Playlist) error {
 
 func (st *storage) fromBytes(buf *bytes.Buffer) (Playlist, error) {
 	dec := gob.NewDecoder(buf)
-	pl := st.createEmptyPlaylist()
+	pl := NewPlaylist().(*playlist)
 	var song songmodule.Song
 	var current bool
 	var currentSong *Song
@@ -109,6 +109,7 @@ func (st *storage) fromBytes(buf *bytes.Buffer) (Playlist, error) {
 		}
 	}
 	pl.currentSong = currentSong
+	pl.storage = st
 	return pl, nil
 }
 
@@ -127,6 +128,8 @@ func (st *storage) load() (Playlist, error) {
 func (st *storage) Load() (Playlist, error) {
 	go func() {
 		pl, err := st.load()
+		x := 1
+		x--
 		st.lock <- msg{pl, err}
 	}()
 	result := <-st.lock
