@@ -69,7 +69,7 @@ func TestPlaylist_AddNegativeSong(t *testing.T) {
 	if err == nil {
 		t.Fatal("Added a song with negative length without errors")
 	} else {
-		t.Logf("Negative-length song couldn't be added due to an error: %v", err)
+		t.Logf("Negative-length song couldn't be added due to an error: %v", err.Error())
 	}
 }
 
@@ -84,7 +84,7 @@ func TestPlaylist_AddSong_many(t *testing.T) {
 	for _, song := range songs {
 		_, err := pl.AddSong(*song)
 		if err != nil {
-			log.Fatalf("Coudln't add song due to an error: %v", err)
+			log.Fatalf("Coudln't add song due to an error: %v", err.Error())
 		}
 	}
 	t.Logf("%v elapsed on adding %v songs to playlist", time.Now().Sub(start), amount)
@@ -141,22 +141,25 @@ func TestPlaylist_Seek(t *testing.T) {
 	for i := 1; i < amount; i++ {
 		_, err := pl.Next()
 		if err != nil {
-			t.Fatalf("Error occurred during Next() method call: %v", err)
+			t.Fatalf("Error occurred during Next() method call: %v", err.Error())
 		}
 		if !validateCurrentSong(pl, songs[i]) {
 			t.Fatalf("Playlist should play %v-th song after %v next() method calls", i+1, i)
 		}
 	}
-	if pl.currentSong.next != nil && pl.currentSong.next.data.IsValid() {
-		t.Fatal("Current song in playlist is not last, but should be")
+	_, err := pl.Next()
+	if err == nil {
+		t.Fatal("Playlist should return an error on Next() method called when the last song is playing")
+	} else {
+		t.Logf("The next song after the last one can't be played due to an error: %v", err.Error())
 	}
-	for i := amount - 2; i > -1; i-- {
+	for i := amount - 1; i > -1; i-- {
 		_, err := pl.Prev()
 		if err != nil {
-			t.Fatalf("Error occurred during Prev() method call: %v", err)
+			t.Fatalf("Error occurred during Prev() method call: %v", err.Error())
 		}
 		if !validateCurrentSong(pl, songs[i]) {
-			t.Fatalf("Playlist should play %v-th song after %v Prev() method calls", i+1, amount-i+1)
+			t.Fatalf("Playlist should play %v-th song after %v Prev() method calls", i+1, amount-i)
 		}
 	}
 	if pl.currentSong.previous != nil && pl.currentSong.previous.data.IsValid() {
