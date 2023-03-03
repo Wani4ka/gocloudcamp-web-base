@@ -18,7 +18,7 @@ jobs:
 
   build:
     needs: test
-    name: Build the Docker image
+    name: Build image
     runs-on: ubuntu-latest
     if: success() && github.ref != 'refs/heads/master'
     steps:
@@ -28,7 +28,7 @@ jobs:
 
   push:
     needs: test
-    name: Build the Docker image and push to GHCR
+    name: Build and push to GHCR
     runs-on: ubuntu-latest
     if: success() && github.ref == 'refs/heads/master'
     permissions:
